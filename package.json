@@ -1,6 +1,6 @@
 {
   "name": "@meetpatel3066/faultkit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Deterministic HTTP dependency fault-injection and resilience testing library for Node.js.",
   "type": "module",
   "main": "./src/index.js",
