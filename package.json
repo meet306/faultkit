@@ -1,0 +1,59 @@
+{
+  "name": "@meetpatel3066/faultkit",
+  "version": "0.1.0",
+  "description": "Deterministic HTTP dependency fault-injection and resilience testing library for Node.js.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "types",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "bench": "node benchmarks/run-benchmarks.js",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test"
+  },
+  "keywords": [
+    "fault-injection",
+    "chaos-engineering",
+    "testing",
+    "http",
+    "resilience",
+    "retry",
+    "circuit-breaker",
+    "vitest",
+    "undici",
+    "fetch"
+  ],
+  "author": "FaultKit Maintainers",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^9.0.0",
+    "faultkit": "file:faultkit-0.1.0.tgz",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
