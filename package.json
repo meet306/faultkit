@@ -18,6 +18,14 @@
     "README.md",
     "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meet306/faultkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/meet306/faultkit/issues"
+  },
+  "homepage": "https://github.com/meet306/faultkit#readme",
   "engines": {
     "node": ">=20.0.0"
   },

@@ -1,6 +1,6 @@
 # FaultKit
 
-[![CI](https://github.com/faultkit/faultkit/actions/workflows/ci.yml/badge.svg)](https://github.com/faultkit/faultkit/actions/workflows/ci.yml)
+[![CI](https://github.com/meet306/faultkit/actions/workflows/ci.yml/badge.svg)](https://github.com/meet306/faultkit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node: >=20](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](package.json)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](package.json)
