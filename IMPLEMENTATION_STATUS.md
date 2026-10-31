@@ -3,6 +3,7 @@
 Last updated: October 2026 (Verified on Node.js 22.13.1, npm 11.0.0, Vitest 5.0.5)
 
 ## 1. Project Overview
+
 FaultKit is an open-source, zero-runtime-dependency Node.js testing library for deterministic HTTP dependency-fault injection and resilience testing.
 
 ---
@@ -10,10 +11,12 @@ FaultKit is an open-source, zero-runtime-dependency Node.js testing library for 
 ## 2. Feature Checklist & Verification Status
 
 ### Phase 1: Research & Ecosystem Analysis
+
 - [x] Competitive analysis documented in `docs/COMPETITIVE_ANALYSIS.md` (analyzed Nock, MSW, Undici MockAgent, test spies, and chaos proxies)
 - [x] Clear differentiator defined: In-process, deterministic, AsyncLocalStorage-isolated HTTP fault injection for Node.js 20+
 
 ### Phase 2: Project Setup & Tooling
+
 - [x] `package.json` with ESM configuration, zero runtime dependencies, and strict verification scripts
 - [x] ESLint flat config (`eslint.config.js`) and Prettier (`.prettierrc`)
 - [x] Vitest configuration with v8 coverage thresholds (`vitest.config.js`)
@@ -21,6 +24,7 @@ FaultKit is an open-source, zero-runtime-dependency Node.js testing library for 
 - [x] License (MIT) and Community files (`README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`)
 
 ### Phase 3: Core Implementation
+
 - [x] Error hierarchy (`FaultKitError`, `ValidationError`, `ScenarioError`, `FaultSimulationError`, `UnmatchedRequestError`) in `src/errors/faultkit-error.js`
 - [x] PRNG implementation (deterministic Mulberry32 PRNG with seed validation) in `src/prng/seed.js`
 - [x] Configuration validation (rules, URLs, delays, status codes, methods) in `src/matching/rule-validation.js`
@@ -38,6 +42,7 @@ FaultKit is an open-source, zero-runtime-dependency Node.js testing library for 
 - [x] Accurate TypeScript type declarations in `types/index.d.ts`
 
 ### Phase 4: Test Suites (91 Tests across 12 Test Files, 0 Failures)
+
 - [x] Unit tests (`tests/unit/`):
   - [x] `validation.test.js` (16 tests)
   - [x] `request-matcher.test.js` (15 tests)
@@ -55,12 +60,14 @@ FaultKit is an open-source, zero-runtime-dependency Node.js testing library for 
   - [x] `security-robustness.test.js` (7 tests) — input bounds, delay caps, prototype pollution defense, secret redaction, timer leaks
 
 ### Phase 5: Documentation & Examples
+
 - [x] Executable examples in `examples/basic`, `examples/retry`, `examples/fallback` (verified runnable with exit code 0)
 - [x] Documentation (`README.md`, `docs/DESIGN.md`, `docs/SECURITY_MODEL.md`, `docs/LIMITATIONS.md`, `docs/BENCHMARKS.md`)
 - [x] Reproducible benchmark suite in `benchmarks/run-benchmarks.js`
 - [x] GitHub Actions CI workflow in `.github/workflows/ci.yml`
 
 ### Phase 6: Final Verification & Packaging
+
 - [x] `npm test`: 91 passed in 694ms
 - [x] `npm run test:coverage`:
   - Statements: 94.29% (target >=85%)

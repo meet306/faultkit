@@ -1,9 +1,13 @@
 # FaultKit
 
+[![npm version](https://img.shields.io/npm/v/@meetpatel3066/faultkit.svg?color=cb3837&style=flat-square)](https://www.npmjs.com/package/@meetpatel3066/faultkit)
+[![npm downloads](https://img.shields.io/npm/dw/@meetpatel3066/faultkit.svg?color=blue&style=flat-square)](https://www.npmjs.com/package/@meetpatel3066/faultkit)
+[![npm total downloads](https://img.shields.io/npm/dt/@meetpatel3066/faultkit.svg?color=blueviolet&style=flat-square)](https://www.npmjs.com/package/@meetpatel3066/faultkit)
 [![CI](https://github.com/meet306/faultkit/actions/workflows/ci.yml/badge.svg)](https://github.com/meet306/faultkit/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node: >=20](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](package.json)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](package.json)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/@meetpatel3066/faultkit)](https://socket.dev/npm/package/@meetpatel3066/faultkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Node: >=20](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](package.json)
+[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-success.svg?style=flat-square)](package.json)
 
 **Deterministic HTTP dependency fault-injection and resilience testing library for Node.js.**
 
