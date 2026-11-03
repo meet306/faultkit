@@ -188,8 +188,9 @@ export function getOriginalFetch(): typeof globalThis.fetch;
 export function forceRestoreFetch(): void;
 
 export const DEFAULT_REDACTED_HEADERS: string[];
+export function sanitizeUrl(urlStr: string): string;
 export function redactHeaders(
-  headers: Headers | Record<string, string>,
+  headers: Headers | Record<string, string> | [string, string][],
   customRedactions?: string[]
 ): Record<string, string>;
 

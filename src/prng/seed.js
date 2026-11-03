@@ -18,8 +18,8 @@ export function createPRNG(seed = 123456789) {
     throw new ValidationError("PRNG seed must be a finite number", { seed });
   }
 
-  // Convert seed to unsigned 32-bit integer
-  let state = seed >>> 0 || 123456789;
+  // Convert seed to unsigned 32-bit integer (preserves seed: 0)
+  let state = seed >>> 0;
 
   return function nextFloat() {
     state = (state + 0x6d2b79f5) | 0;

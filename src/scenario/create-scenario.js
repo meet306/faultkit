@@ -49,6 +49,7 @@ export class Scenario {
     this.resourceTracker = new ResourceTracker();
     this.collector = new ScenarioReportCollector(this.name, this.rules, this.redactHeaders);
     this.isActive = false;
+    this._isGloballyActive = false;
     this.isDisposed = false;
   }
 
@@ -75,6 +76,7 @@ export class Scenario {
       });
     }
     this.isActive = true;
+    this._isGloballyActive = true;
     registerActiveScenario(this, true);
     return this;
   }
@@ -85,6 +87,7 @@ export class Scenario {
    */
   deactivate() {
     this.isActive = false;
+    this._isGloballyActive = false;
     unregisterActiveScenario(this);
     return this;
   }

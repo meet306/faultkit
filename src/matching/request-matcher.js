@@ -36,24 +36,26 @@ export function extractRequestDetails(input, init) {
     if (init.method) {
       method = init.method;
     }
-    if (init.headers) {
-      const initHeaders = new Headers(init.headers);
-      for (const [k, v] of initHeaders.entries()) {
-        headers.set(k, v);
-      }
+    // Per WHATWG fetch spec, init.headers replaces input.headers
+    if (init.headers !== undefined) {
+      headers = new Headers(init.headers);
     }
     if (init.signal) {
       signal = init.signal;
     }
   }
 
-  // Parse URL safely
+  // Parse URL safely without throwing unhandled exceptions
   let url;
   try {
     url = new URL(urlStr);
   } catch {
-    // Relative URL fallback for local requests
-    url = new URL(urlStr, "http://localhost");
+    try {
+      // Relative URL fallback for local requests
+      url = new URL(urlStr, "http://localhost");
+    } catch {
+      url = new URL("http://localhost/malformed-request");
+    }
   }
 
   return {
@@ -74,17 +76,37 @@ export function extractRequestDetails(input, init) {
  */
 export function matchesPattern(target, pattern, wildcardSupport = false) {
   if (typeof pattern === "string") {
-    if (wildcardSupport && pattern.startsWith("*.")) {
-      const suffix = pattern.slice(1).toLowerCase(); // e.g. .example.com
-      return (
-        target.toLowerCase().endsWith(suffix) ||
-        target.toLowerCase() === pattern.slice(2).toLowerCase()
-      );
+    if (pattern === "*") {
+      return true;
+    }
+    if (wildcardSupport) {
+      if (pattern.startsWith("*.")) {
+        const suffix = pattern.slice(1).toLowerCase(); // e.g. .example.com
+        return (
+          target.toLowerCase().endsWith(suffix) ||
+          target.toLowerCase() === pattern.slice(2).toLowerCase()
+        );
+      }
+      if (pattern.endsWith("/*")) {
+        const prefix = pattern.slice(0, -1).toLowerCase(); // e.g. /api/
+        return (
+          target.toLowerCase().startsWith(prefix) ||
+          target.toLowerCase() === pattern.slice(0, -2).toLowerCase()
+        );
+      }
+      if (pattern.endsWith("*")) {
+        const prefix = pattern.slice(0, -1).toLowerCase();
+        return target.toLowerCase().startsWith(prefix);
+      }
     }
     return target.toLowerCase() === pattern.toLowerCase();
   }
 
   if (pattern instanceof RegExp) {
+    // Reset stateful regular expressions (global and sticky flags) to avoid alternating matching failures
+    if (pattern.global || pattern.sticky) {
+      pattern.lastIndex = 0;
+    }
     return pattern.test(target);
   }
 
@@ -130,7 +152,7 @@ export function matchesRequest(requestDetails, matchCriteria) {
 
   // 3. Pathname match
   if (matchCriteria.pathname !== undefined) {
-    if (!matchesPattern(url.pathname, matchCriteria.pathname, false)) {
+    if (!matchesPattern(url.pathname, matchCriteria.pathname, true)) {
       return false;
     }
   }

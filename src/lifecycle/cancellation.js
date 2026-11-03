@@ -49,8 +49,14 @@ export function sleep(ms, signal, tracker) {
       return reject(createAbortError(signal.reason));
     }
 
+    if (tracker?.isDisposed) {
+      return reject(createAbortError("Resource tracker has already been disposed"));
+    }
+
     /** @type {{ id: ReturnType<typeof setTimeout> | null }} */
     const handle = { id: null };
+    /** @type {(() => void) | null} */
+    let unregisterTrackerCleanup = null;
 
     const cleanup = () => {
       if (handle.id !== null) {
@@ -60,6 +66,10 @@ export function sleep(ms, signal, tracker) {
       }
       if (signal) {
         signal.removeEventListener("abort", onAbort);
+      }
+      if (unregisterTrackerCleanup) {
+        unregisterTrackerCleanup();
+        unregisterTrackerCleanup = null;
       }
     };
 
@@ -79,6 +89,10 @@ export function sleep(ms, signal, tracker) {
 
     if (tracker) {
       tracker.registerTimer(handle.id);
+      unregisterTrackerCleanup = tracker.registerCleanup(() => {
+        cleanup();
+        reject(createAbortError("Scenario or resource tracker was disposed during operation"));
+      });
     }
   });
 }

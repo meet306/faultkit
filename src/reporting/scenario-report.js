@@ -11,20 +11,75 @@ export const DEFAULT_REDACTED_HEADERS = [
   "x-api-key",
   "api-key",
   "x-auth-token",
-  "token"
+  "token",
+  "x-csrf-token",
+  "x-xsrf-token",
+  "session"
 ];
 
+const SENSITIVE_QUERY_PARAM_NAMES = new Set([
+  "token",
+  "accesstoken",
+  "authtoken",
+  "apikey",
+  "key",
+  "secret",
+  "clientsecret",
+  "password",
+  "pass",
+  "signature",
+  "sig"
+]);
+
 /**
- * Redacts sensitive header names from a given Headers instance or plain object.
+ * Sanitizes a URL string by redacting embedded basic auth credentials and sensitive query parameters.
+ *
+ * @param {string} urlStr
+ * @returns {string} Sanitized URL
+ */
+export function sanitizeUrl(urlStr) {
+  if (typeof urlStr !== "string") {
+    return String(urlStr);
+  }
+
+  try {
+    const parsed = new URL(urlStr);
+    let changed = false;
+
+    if (parsed.username) {
+      parsed.username = "[REDACTED]";
+      changed = true;
+    }
+    if (parsed.password) {
+      parsed.password = "[REDACTED]";
+      changed = true;
+    }
+
+    for (const [paramKey] of parsed.searchParams.entries()) {
+      const normalizedKey = paramKey.toLowerCase().replace(/[-_]/g, "");
+      if (SENSITIVE_QUERY_PARAM_NAMES.has(normalizedKey)) {
+        parsed.searchParams.set(paramKey, "[REDACTED]");
+        changed = true;
+      }
+    }
+
+    return changed ? decodeURI(parsed.href) : urlStr;
+  } catch {
+    return urlStr;
+  }
+}
+
+/**
+ * Redacts sensitive header names from a given Headers instance, plain object, or entries array.
  * Returns an object with null prototype to avoid prototype pollution.
  *
- * @param {Headers | Record<string, string>} headers
+ * @param {Headers | Record<string, string> | [string, string][]} headers
  * @param {string[]} [customRedactions=[]]
  * @returns {Record<string, string>} Sanitized headers object with null prototype.
  */
 export function redactHeaders(headers, customRedactions = []) {
   const sensitiveSet = new Set(
-    [...DEFAULT_REDACTED_HEADERS, ...customRedactions].map((h) => h.toLowerCase())
+    [...DEFAULT_REDACTED_HEADERS, ...customRedactions].map((h) => h.trim().toLowerCase())
   );
 
   /** @type {Record<string, string>} */
@@ -34,22 +89,24 @@ export function redactHeaders(headers, customRedactions = []) {
     return result;
   }
 
-  if (headers instanceof Headers) {
-    for (const [key, val] of headers.entries()) {
-      const lowerKey = key.toLowerCase();
-      if (lowerKey === "__proto__" || lowerKey === "prototype" || lowerKey === "constructor") {
-        continue;
-      }
-      result[lowerKey] = sensitiveSet.has(lowerKey) ? "[REDACTED]" : val;
+  const entries =
+    headers instanceof Headers
+      ? headers.entries()
+      : Array.isArray(headers)
+        ? headers
+        : typeof headers === "object"
+          ? Object.entries(headers)
+          : [];
+
+  for (const item of entries) {
+    if (!item || typeof item !== "object") continue;
+    const key = String(item[0]);
+    const val = item[1];
+    const lowerKey = key.trim().toLowerCase();
+    if (lowerKey === "__proto__" || lowerKey === "prototype" || lowerKey === "constructor") {
+      continue;
     }
-  } else if (typeof headers === "object") {
-    for (const [key, val] of Object.entries(headers)) {
-      const lowerKey = key.toLowerCase();
-      if (lowerKey === "__proto__" || lowerKey === "prototype" || lowerKey === "constructor") {
-        continue;
-      }
-      result[lowerKey] = sensitiveSet.has(lowerKey) ? "[REDACTED]" : String(val);
-    }
+    result[lowerKey] = sensitiveSet.has(lowerKey) ? "[REDACTED]" : String(val);
   }
 
   return result;
@@ -107,7 +164,7 @@ export class ScenarioReportCollector {
     this.events.push({
       timestamp: Date.now(),
       method: event.method,
-      url: event.url,
+      url: sanitizeUrl(event.url),
       ruleIndex: event.ruleIndex,
       faultType: event.faultType,
       faultTriggered: event.faultTriggered,

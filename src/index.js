@@ -3,7 +3,7 @@
  * @module faultkit
  */
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.1.3";
 
 // Public scenario factory & class
 export { createScenario, Scenario } from "./scenario/create-scenario.js";
@@ -30,7 +30,11 @@ export {
 export { isFetchPatched, forceRestoreFetch, getOriginalFetch } from "./adapters/fetch.js";
 
 // Privacy and diagnostics utilities
-export { redactHeaders, DEFAULT_REDACTED_HEADERS } from "./reporting/scenario-report.js";
+export {
+  redactHeaders,
+  DEFAULT_REDACTED_HEADERS,
+  sanitizeUrl
+} from "./reporting/scenario-report.js";
 
 // Deterministic PRNG
 export { createPRNG } from "./prng/seed.js";

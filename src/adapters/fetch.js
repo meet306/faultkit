@@ -8,6 +8,9 @@ import { AsyncLocalStorage } from "node:async_hooks";
 /** @type {AsyncLocalStorage<{ scenario: any }>} */
 export const scenarioStorage = new AsyncLocalStorage();
 
+/** @type {typeof globalThis.fetch} */
+const systemNativeFetch = globalThis.fetch;
+
 /** @type {typeof globalThis.fetch | null} */
 let originalFetch = null;
 
@@ -17,8 +20,8 @@ let isPatched = false;
 /** @type {Set<any>} */
 const activeScenarios = new Set();
 
-/** @type {any | null} */
-let globalActiveScenario = null;
+/** @type {any[]} */
+const globalActiveScenarios = [];
 
 /**
  * Returns whether global fetch is currently intercepted.
@@ -33,7 +36,7 @@ export function isFetchPatched() {
  * @returns {typeof globalThis.fetch}
  */
 export function getOriginalFetch() {
-  return originalFetch || globalThis.fetch;
+  return originalFetch || systemNativeFetch;
 }
 
 /**
@@ -48,22 +51,30 @@ export function ensureFetchPatched() {
   originalFetch = globalThis.fetch;
 
   globalThis.fetch = async function faultkitFetchProxy(input, init) {
+    const fallbackFetch = originalFetch || systemNativeFetch;
+
     // 1. Scoped async context takes precedence (for scenario.run)
     const store = scenarioStorage.getStore();
     let targetScenario = store?.scenario;
 
     // 2. Global active scenario fallback (for manual scenario.activate)
-    if (!targetScenario && globalActiveScenario?.isActive) {
-      targetScenario = globalActiveScenario;
+    if (!targetScenario && globalActiveScenarios.length > 0) {
+      for (let i = globalActiveScenarios.length - 1; i >= 0; i--) {
+        const candidate = globalActiveScenarios[i];
+        if (candidate?.isActive && !candidate?.isDisposed) {
+          targetScenario = candidate;
+          break;
+        }
+      }
     }
 
     // 3. If no active scenario, passthrough to real fetch
     if (!targetScenario || !targetScenario.isActive) {
-      return (originalFetch || fetch).call(globalThis, input, init);
+      return fallbackFetch.call(globalThis, input, init);
     }
 
     // 4. Delegate to the active scenario
-    return targetScenario.handleRequest(input, init, originalFetch || fetch);
+    return targetScenario.handleRequest(input, init, fallbackFetch);
   };
 
   isPatched = true;
@@ -77,7 +88,7 @@ export function restoreFetchIfIdle() {
     return;
   }
 
-  if (activeScenarios.size === 0 && globalActiveScenario === null) {
+  if (activeScenarios.size === 0 && globalActiveScenarios.length === 0) {
     if (originalFetch) {
       globalThis.fetch = originalFetch;
       originalFetch = null;
@@ -94,8 +105,8 @@ export function restoreFetchIfIdle() {
 export function registerActiveScenario(scenario, isGlobal = false) {
   ensureFetchPatched();
   activeScenarios.add(scenario);
-  if (isGlobal) {
-    globalActiveScenario = scenario;
+  if (isGlobal && !globalActiveScenarios.includes(scenario)) {
+    globalActiveScenarios.push(scenario);
   }
 }
 
@@ -105,8 +116,9 @@ export function registerActiveScenario(scenario, isGlobal = false) {
  */
 export function unregisterActiveScenario(scenario) {
   activeScenarios.delete(scenario);
-  if (globalActiveScenario === scenario) {
-    globalActiveScenario = null;
+  const idx = globalActiveScenarios.indexOf(scenario);
+  if (idx !== -1) {
+    globalActiveScenarios.splice(idx, 1);
   }
   restoreFetchIfIdle();
 }
@@ -116,7 +128,7 @@ export function unregisterActiveScenario(scenario) {
  */
 export function forceRestoreFetch() {
   activeScenarios.clear();
-  globalActiveScenario = null;
+  globalActiveScenarios.length = 0;
   if (isPatched && originalFetch) {
     globalThis.fetch = originalFetch;
     originalFetch = null;

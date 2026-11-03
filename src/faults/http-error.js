@@ -21,8 +21,12 @@ export function simulateHttpError(faultConfig = {}) {
   const body = faultConfig.body;
   let bodyPayload = null;
 
-  // 204 and 304 status codes cannot have a body per fetch spec
-  if (status !== 204 && status !== 304 && body !== undefined && body !== null) {
+  // Null-body status codes per WHATWG fetch specification:
+  // 1xx (100-199), 204 No Content, 205 Reset Content, and 304 Not Modified cannot have a body
+  const isNullBodyStatus =
+    (status >= 100 && status < 200) || status === 204 || status === 205 || status === 304;
+
+  if (!isNullBodyStatus && body !== undefined && body !== null) {
     if (typeof body === "object") {
       bodyPayload = JSON.stringify(body);
       if (!headers.has("content-type")) {
